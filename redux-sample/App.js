@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { load } from './user'
 
-import { withStyles } from '@material-ui/core'
+import { withStyles, withTheme } from '@material-ui/core/styles'
 import {
   AppBar,
   Toolbar,
@@ -14,15 +14,27 @@ import {
   DialogTitle,
   DialogContent
 } from '@material-ui/core'
-import Typography from '@material-ui/core/Typography'
 import { Email } from '@material-ui/icons'
+import withWidth from '@material-ui/core/withWidth'
+import { orange } from '@material-ui/core/colors'
+import { hot } from 'react-hot-loader'
 
+@hot(module)
 @connect(
   state => ({
     users: state.user.users
   }),
   { load }
 )
+@withWidth()
+@withTheme()
+@withStyles({
+  root: {
+    fontStyle: 'itaric',
+    fontSize: 21,
+    minHeight: 64,
+  }
+})
 export default class App extends React.Component {
 
   constructor(props) {
@@ -34,6 +46,7 @@ export default class App extends React.Component {
   }
 
   componentWillMount() {
+    // user取得APIコールのactionをキックする
     this.props.load()
   }
 
@@ -49,14 +62,13 @@ export default class App extends React.Component {
   };
 
   render() {
-    const { users } = this.props
+    const { users, theme, classes, width } = this.props
+    const { primary, secondary } = theme.palette
     return (
       <div>
         <AppBar position="static" color="primary">
-          <Toolbar>
-            <Typography type="title" color="inherit">
-              タイトル
-            </Typography>
+          <Toolbar classes={{ root: classes.root }}>
+            タイトル({width === 'xs' ? 'スマホ' : 'PC'})
           </Toolbar>
         </AppBar>
         {/* 配列形式で返却されるためmapで展開する */}
@@ -66,10 +78,10 @@ export default class App extends React.Component {
             <Card key={user.email} style={{ marginTop: '10px' }}>
               <CardContent style={{ color: '#408040' }}>
                 <Avatar src={user.picture.thumbnail} />
-                <p style={{ margin: 10 }}>{'名前:' + user.name.first + ' ' + user.name.last} </p>
-                <p style={{ margin: 10 }}>{'性別:' + (user.gender == 'male' ? '男性' : '女性')}</p>
+                <p style={{ margin: 10, color: primary[500] }}>{'名前:' + user.name.first + ' ' + user.name.last} </p>
+                <p style={{ margin: 10, color: primary[500] }}>{'性別:' + (user.gender == 'male' ? '男性' : '女性')}</p>
                 <div style={{ textAlign: 'right' }} >
-                  <Button onClick={() => this.handleClickOpen(user)}><Email />メールする</Button>
+                  <Button onClick={() => this.handleClickOpen(user)}><Email style={{ marginRight: 5, color: orange[500] }} />Email</Button>
                 </div>
               </CardContent>
             </Card>
@@ -77,7 +89,7 @@ export default class App extends React.Component {
         })}
         {
           this.state.open &&
-          <Dialog open={this.state.open} onRequestClose={() => this.handleRequestClose()}>
+          <Dialog open={this.state.open} onClose={() => this.handleRequestClose()}>
             <DialogTitle>メールアドレス</DialogTitle>
             <DialogContent>{this.state.user.email}</DialogContent>
           </Dialog>
